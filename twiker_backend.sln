@@ -1,0 +1,35 @@
+﻿Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.002.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Test", "Test", "{3662EA47-1310-4FD7-92F1-B73108A78054}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MainTest", "Test\MainTest\MainTest.csproj", "{10621BCC-7950-4BEA-BF83-BECE2847B1F2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "twiker_backend", "Main\twiker_backend.csproj", "{0F9E661C-3BEC-496B-A8FF-2FFC782E8B62}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{10621BCC-7950-4BEA-BF83-BECE2847B1F2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{10621BCC-7950-4BEA-BF83-BECE2847B1F2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{10621BCC-7950-4BEA-BF83-BECE2847B1F2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{10621BCC-7950-4BEA-BF83-BECE2847B1F2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0F9E661C-3BEC-496B-A8FF-2FFC782E8B62}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0F9E661C-3BEC-496B-A8FF-2FFC782E8B62}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0F9E661C-3BEC-496B-A8FF-2FFC782E8B62}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0F9E661C-3BEC-496B-A8FF-2FFC782E8B62}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {DECD45FF-B351-4C4A-BEF9-D096E3029861}
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{10621BCC-7950-4BEA-BF83-BECE2847B1F2} = {3662EA47-1310-4FD7-92F1-B73108A78054}
+	EndGlobalSection
+EndGlobal
