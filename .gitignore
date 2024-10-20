@@ -485,3 +485,10 @@ $RECYCLE.BIN/
 
 # shell script
 *.sh
+
+# sql files
+*.sql
+shell/*
+
+# key pair
+*.pem
