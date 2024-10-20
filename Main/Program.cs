@@ -9,7 +9,6 @@ using twiker_backend.Models.DatabaseContext;
 using twiker_backend.Redis;
 using twiker_backend.Db.Repository;
 using twiker_backend.ServiceLayer;
-using twiker_backend.VaultSharp;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -32,8 +31,6 @@ builder.Services.AddScoped<IRedisPostData, PostInfo>();
 builder.Services.AddScoped<IRedisUserData, UserInfo>();
 builder.Services.AddScoped<IDbUserInfo, DbUserInfo>();
 builder.Services.AddScoped<IDbPostInfo, DbPostInfo>();
-builder.Services.AddScoped<IApproleAuth, ApproleAuth>();
-builder.Services.AddScoped<IJwtHelper, JwtHelper>();
 var redis = ConnectionMultiplexer.Connect(DotNetEnv.Env.GetString("RedisConnection"));
 builder.Services.AddSingleton<IConnectionMultiplexer>(redis);
 builder.Services.AddDbContext<TwikerContext>(options => options.UseNpgsql(DotNetEnv.Env.GetString("connection_string")));
