@@ -1,0 +1,31 @@
+variables:
+  BUILD_PATH: '$CI_PROJECT_DIR/shell/start-backend-dev.sh'
+  EXEC_PATH: '$CI_PROJECT_DIR/shell/exec-backend-dev.sh'
+  FIN_PATH: '$CI_PROJECT_DIR/shell/stop-backend-dev.sh'
+
+stages:
+  - build
+  - test
+
+build:
+  tags:
+    - twiker_backend
+  stage: build
+  before_script:
+    - cp ${DEV_ENV_FILE} .env
+  script: 
+    - $BUILD_PATH
+  timeout:
+    20 minutes
+
+unit test:
+  tags:
+    - twiker_backend
+  stage: test
+  needs: ["build"]
+  script: 
+    - $EXEC_PATH
+  timeout:
+    10 minutes
+  after_script: 
+    - $FIN_PATH
