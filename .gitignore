@@ -492,6 +492,7 @@ shell/*
 
 # sql files
 *.sql
+!twiker_dump.sql
 
 # key pair
 *.pem
