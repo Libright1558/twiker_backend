@@ -485,10 +485,13 @@ $RECYCLE.BIN/
 
 # shell script
 *.sh
+shell/*
+!exec-backend-dev.sh
+!start-backend-dev.sh
+!stop-backend-dev.sh
 
 # sql files
 *.sql
-shell/*
 
 # key pair
 *.pem
