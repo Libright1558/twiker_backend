@@ -1,3 +1,3 @@
 #!/bin/bash
 
-docker exec -w /source twiker-app-dev-container dotnet test
+docker exec -w /source/Test/MainTest twiker-app-dev-container dotnet MainTest.dll
