@@ -12,5 +12,8 @@ RUN dotnet restore
 RUN dotnet build --no-restore
 
 # Runtime stage
+FROM mcr.microsoft.com/dotnet/aspnet:8.0
+WORKDIR /source
+COPY --from=build /source/* .
 WORKDIR /source/Main
-ENTRYPOINT ["dotnet", "run"]
+ENTRYPOINT ["dotnet", "twiker_backend.dll"]
