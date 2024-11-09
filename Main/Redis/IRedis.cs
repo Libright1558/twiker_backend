@@ -36,5 +36,7 @@ namespace twiker_backend.Redis
         Task WriteUserInfoAsync(string userId, RedisUserData userInfo, int expirySeconds);
 
         Task SetUserInfoExp(string userId, int expirySeconds);
+
+        Task DeleteUserInfo(string userId);
     }
 }
