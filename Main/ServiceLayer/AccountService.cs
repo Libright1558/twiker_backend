@@ -125,6 +125,33 @@ namespace twiker_backend.ServiceLayer
                 throw;
             }
         }
+
+        public async Task<DeleteAccountResult> DeleteAccountAsync(string userIdentifier)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(userIdentifier))
+                {
+                    return DeleteAccountResult.InvalidInput;
+                }
+
+                UserDbData? FoundUser = await _dbUserInfo.FindOneUser(userIdentifier);
+
+                if (FoundUser == null)
+                {
+                    return DeleteAccountResult.UserNotExist;
+                }
+
+                await _dbUserInfo.DeleteUserData(FoundUser.UserId);
+                return DeleteAccountResult.Success;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "DeleteAccountAsync");
+                Console.WriteLine(ex.ToString());
+                return DeleteAccountResult.Error;
+            }
+        }
     }
 
     public enum RegisterResult
@@ -140,5 +167,13 @@ namespace twiker_backend.ServiceLayer
         public bool Success { get; set; }
         public string? Token { get; set; }
         public string? ErrorMessage { get; set; }
+    }
+
+    public enum DeleteAccountResult
+    {
+        Success,
+        InvalidInput,
+        UserNotExist,
+        Error
     }
 }
