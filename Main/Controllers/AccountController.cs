@@ -4,6 +4,7 @@ using twiker_backend.Db.Models;
 using twiker_backend.ServiceLayer;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Http;
+using twiker_backend.CustomAttributes.Authentication;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -62,6 +63,29 @@ public class AccountController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "AccountController Login Error");
+            Console.WriteLine(ex.ToString());
+            return StatusCode(500, $"Internal server error: {ex.Message}");
+        }
+    }
+
+    [HttpDelete("deleteAccount"), AccessAuthorize]
+    public async Task<IActionResult> DeleteAccount([FromBody] string userIdentifier)
+    {
+        try
+        {
+            var result = await _accountService.DeleteAccountAsync(userIdentifier);
+            return result switch
+            {
+                DeleteAccountResult.Success => Ok(),
+                DeleteAccountResult.InvalidInput => BadRequest(),
+                DeleteAccountResult.UserNotExist => NotFound(),
+                DeleteAccountResult.Error => StatusCode(500),
+                _ => StatusCode(500)
+            };
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "AccountController DeleteAccount Error");
             Console.WriteLine(ex.ToString());
             return StatusCode(500, $"Internal server error: {ex.Message}");
         }
