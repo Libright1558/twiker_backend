@@ -262,4 +262,95 @@ public class AccountServiceTests
             Console.WriteLine(ex.ToString());
         }
     }
+
+    [Test]
+    public async Task DeleteAccountAsync_Success()
+    {
+        try
+        {
+            // Arrange
+            var user = new UserTable
+            {
+                UserId = Guid.NewGuid(),
+                Firstname = "qwerty1",
+                Lastname = "zxcvbn1",
+                Username = "zxcvbn1",
+                Email = "qwerty1zxcvbn1@example.com",
+                Password = BCrypt.Net.BCrypt.HashPassword("password123", 12)
+            };
+            _context.UserTables.Add(user);
+            await _context.SaveChangesAsync();
+
+            // Act
+            var result = await _accountService.DeleteAccountAsync(user.Username);
+
+            // Assert
+            Assert.That(result, Is.EqualTo(DeleteAccountResult.Success));
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
+        }
+    }
+
+    
+    [Test]
+    public async Task DeleteAccountAsync_InvalidInput()
+    {
+        try
+        {
+            // Arrange
+            var user = new UserTable
+            {
+                UserId = Guid.NewGuid(),
+                Firstname = "qwerty2",
+                Lastname = "zxcvbn2",
+                Username = "zxcvbn2",
+                Email = "qwerty2zxcvbn2@example.com",
+                Password = BCrypt.Net.BCrypt.HashPassword("password123", 12)
+            };
+            _context.UserTables.Add(user);
+            await _context.SaveChangesAsync();
+
+            // Act
+            var result = await _accountService.DeleteAccountAsync("");
+
+            // Assert
+            Assert.That(result, Is.EqualTo(DeleteAccountResult.InvalidInput));
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
+        }
+    }
+
+    [Test]
+    public async Task DeleteAccountAsync_UserNotExist()
+    {
+        try
+        {
+            // Arrange
+            var user = new UserTable
+            {
+                UserId = Guid.NewGuid(),
+                Firstname = "qwerty3",
+                Lastname = "zxcvbn3",
+                Username = "zxcvbn3",
+                Email = "qwerty3zxcvbn3@example.com",
+                Password = BCrypt.Net.BCrypt.HashPassword("password123", 12)
+            };
+            _context.UserTables.Add(user);
+            await _context.SaveChangesAsync();
+
+            // Act
+            var result = await _accountService.DeleteAccountAsync("abcdef");
+
+            // Assert
+            Assert.That(result, Is.EqualTo(DeleteAccountResult.UserNotExist));
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
+        }
+    }
 }
