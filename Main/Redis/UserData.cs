@@ -21,6 +21,11 @@ namespace twiker_backend.Redis
             return batch.StringSetAsync(GetKey(userId, field), value, expiry, When.NotExists);
         }
 
+        private static Task<bool> DeleteUserField(IBatch batch, string userId, string field)
+        {
+            return batch.KeyDeleteAsync(GetKey(userId, field));
+        }
+
         public UserInfo(IConnectionMultiplexer multiplexer)
         {
             _connectionMultiplexer = multiplexer;
@@ -75,6 +80,20 @@ namespace twiker_backend.Redis
             foreach (var field in _userFields)
             {
                 tasks.Add(batch.KeyExpireAsync(GetKey(userId, field), expiry));
+            }
+
+            batch.Execute();
+            await Task.WhenAll(tasks);
+        }
+
+        public async Task DeleteUserInfo(string userId)
+        {
+            var batch = _db.CreateBatch();
+            var tasks = new List<Task>();
+
+            foreach (var field in _userFields)
+            {
+                tasks.Add(DeleteUserField(batch, userId, field));
             }
 
             batch.Execute();
