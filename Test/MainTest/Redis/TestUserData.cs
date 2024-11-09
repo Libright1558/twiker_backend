@@ -275,5 +275,40 @@ namespace Test.MainTest.Redis
                 Console.WriteLine(ex.ToString());
             }
         }
+
+        [Test]
+        public async Task DeleteUserInfo_UserHasBeenDeleted()
+        {
+            try
+            {
+                // Arrange
+                string userId = "user1000";
+                var fields = new[] { "Firstname", "Lastname", "Username", "Email", "Profilepic" };
+
+                // Set fields
+                await _db.StringSetAsync($"{userId}_Firstname", "Asd");
+                await _db.StringSetAsync($"{userId}_Lastname", "Fgh");
+                await _db.StringSetAsync($"{userId}_Username", "AsdFgh");
+                await _db.StringSetAsync($"{userId}_Email", "AsdFgh@email.com");
+                await _db.StringSetAsync($"{userId}_Profilepic", "default");
+
+                // Act
+                await _userInfo.DeleteUserInfo("user1000");
+
+                Assert.Multiple(async () =>
+                {
+                    // Assert
+                    Assert.That(await _db.KeyExistsAsync($"{userId}_Firstname"), Is.False);
+                    Assert.That(await _db.KeyExistsAsync($"{userId}_Lastname"), Is.False);
+                    Assert.That(await _db.KeyExistsAsync($"{userId}_Username"), Is.False);
+                    Assert.That(await _db.KeyExistsAsync($"{userId}_Email"), Is.False);
+                    Assert.That(await _db.KeyExistsAsync($"{userId}_Profilepic"), Is.False);
+                });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+            }
+        }
     }
 }
