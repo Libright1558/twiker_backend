@@ -13,6 +13,8 @@ namespace twiker_backend.ServiceLayer
         Task<RegisterResult> RegisterAccountAsync(RegisterModel model);
 
         Task<LoginResult> LoginAsync(LoginModel model);
+
+        Task<DeleteAccountResult> DeleteAccountAsync(string userIdentifier);
     }
 
     public interface IPostService
