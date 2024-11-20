@@ -1,0 +1,41 @@
+services:
+  db:
+    image: postgres:17
+    container_name: twiker-postgres
+    hostname: twiker-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: postgres
+      POSTGRES_HOST_AUTH_METHOD: scram-sha-256
+      POSTGRES_INITDB_ARGS: --auth-host=scram-sha-256
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_dev:/var/lib/postgresql/data
+      - ./db-init/twiker_dump.sql:/docker-entrypoint-initdb.d/twiker_dump.sql
+
+  redis:
+    image: "redis"
+    container_name: twiker-redis
+    hostname: twiker-redis
+    environment:
+      - REDIS_REPLICATION_MODE=master
+    ports:
+      - "6379:6379"
+
+  twiker-app:
+    image: twiker-app-unittest
+    build: 
+      dockerfile: twiker-app-unittest.dockerfile
+      context: .
+    depends_on:
+      - db
+      - redis
+    ports:
+      - "8080:8080"
+    container_name: twiker-app-unitTest
+    hostname: twiker-app-dev
+
+volumes:
+  postgres_dev:
