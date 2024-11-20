@@ -30,7 +30,7 @@ public class UserServiceTests
     {
         DotNetEnv.Env.TraversePath().Load();
         _options = new DbContextOptionsBuilder<TwikerContext>()
-        .UseNpgsql(DotNetEnv.Env.GetString("connection_mock"))
+        .UseNpgsql(DotNetEnv.Env.GetString("connection_string"))
         .Options;
         
         // Initialize DbContext

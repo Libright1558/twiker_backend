@@ -29,7 +29,7 @@ public class PostServiceTests
     {
         DotNetEnv.Env.TraversePath().Load();
         _options = new DbContextOptionsBuilder<TwikerContext>()
-        .UseNpgsql(DotNetEnv.Env.GetString("connection_mock"))
+        .UseNpgsql(DotNetEnv.Env.GetString("connection_string"))
         .Options;
 
         // Initialize DbContext
@@ -213,6 +213,19 @@ public class PostServiceTests
             Assert.That(cachedLikeNum.HasValue, Is.False);
             var cachedSelfLike = await _redisDb.StringGetAsync($"{postId}_{userId}_SelfLike");
             Assert.That(cachedSelfLike.HasValue, Is.False);
+
+            // Verify Redis cache was reloaded and output was correct
+            var result = await _postService.GetPost(userId, username);
+            var cachedLikeNumV2 = await _redisDb.StringGetAsync($"{postId}_LikeNums");
+            var cachedSelfLikeV2 = await _redisDb.StringGetAsync($"{postId}_{userId}_SelfLike");
+ 
+            Assert.Multiple(() =>
+            {
+                Assert.That(int.Parse(cachedLikeNumV2!), Is.EqualTo(1));
+                Assert.That(bool.Parse(cachedSelfLikeV2!), Is.EqualTo(true));
+                Assert.That(result?[0]?.LikeNum, Is.EqualTo(1));
+                Assert.That(result?[0]?.SelfLike, Is.EqualTo(true));
+            });
         }
         catch (Exception ex)
         {
@@ -256,6 +269,19 @@ public class PostServiceTests
             Assert.That(cachedRetweetNum.HasValue, Is.False);
             var cachedSelfRetweet = await _redisDb.StringGetAsync($"{postId}_{userId}_SelfRetweet");
             Assert.That(cachedSelfRetweet.HasValue, Is.False);
+
+            // Verify Redis cache was reloaded and output was correct
+            var result = await _postService.GetPost(userId, username);
+            var cachedRetweetNumV2 = await _redisDb.StringGetAsync($"{postId}_RetweetNums");
+            var cachedSelfRetweetV2 = await _redisDb.StringGetAsync($"{postId}_{userId}_SelfRetweet");
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(int.Parse(cachedRetweetNumV2!), Is.EqualTo(1));
+                Assert.That(bool.Parse(cachedSelfRetweetV2!), Is.EqualTo(true));
+                Assert.That(result?[0]?.RetweetNum, Is.EqualTo(1));
+                Assert.That(result?[0]?.SelfRetweet, Is.EqualTo(true));
+            });
         }
         catch (Exception ex)
         {
