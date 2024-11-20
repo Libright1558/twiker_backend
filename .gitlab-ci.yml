@@ -1,7 +1,7 @@
 variables:
-  BUILD_PATH: '$CI_PROJECT_DIR/shell/start-backend-dev.sh'
-  EXEC_PATH: '$CI_PROJECT_DIR/shell/exec-backend-dev.sh'
-  FIN_PATH: '$CI_PROJECT_DIR/shell/stop-backend-dev.sh'
+  UNIT_TEST_BUILD_PATH: '$CI_PROJECT_DIR/shell/start-twiker-unitTest.sh'
+  UNIT_TEST_EXEC_PATH: '$CI_PROJECT_DIR/shell/exec-twiker-unitTest.sh'
+  UNIT_TEST_FIN_PATH: '$CI_PROJECT_DIR/shell/stop-twiker-unitTest.sh'
 
 stages:
   - build
@@ -9,23 +9,27 @@ stages:
 
 build:
   tags:
-    - twiker_backend
+    - twiker_backend_unit_test
   stage: build
   before_script:
+    - |
+      mkdir -p ./KeyPair
+      openssl genrsa -out ./KeyPair/private_key.pem 2048
+      openssl rsa -in ./KeyPair/private_key.pem -pubout -out ./KeyPair/public_key.pem
     - cp ${DEV_ENV_FILE} .env
   script: 
-    - $BUILD_PATH
+    - $UNIT_TEST_BUILD_PATH
   timeout:
     20 minutes
 
 unit test:
   tags:
-    - twiker_backend
+    - twiker_backend_unit_test
   stage: test
   needs: ["build"]
   script: 
-    - $EXEC_PATH
+    - $UNIT_TEST_EXEC_PATH
   timeout:
     10 minutes
   after_script: 
-    - $FIN_PATH
+    - $UNIT_TEST_FIN_PATH
