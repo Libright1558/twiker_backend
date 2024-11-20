@@ -487,4 +487,4 @@ $RECYCLE.BIN/
 .dotnet
 Dockerfile
 .git/
-*.sh
+*/*.sh
