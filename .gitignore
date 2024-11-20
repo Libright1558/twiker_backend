@@ -484,8 +484,6 @@ $RECYCLE.BIN/
 *.swp
 
 # shell script
-*.sh
-shell/*
 !exec-backend-dev.sh
 !start-backend-dev.sh
 !stop-backend-dev.sh
