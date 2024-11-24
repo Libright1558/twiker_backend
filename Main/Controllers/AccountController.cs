@@ -4,7 +4,7 @@ using twiker_backend.Db.Models;
 using twiker_backend.ServiceLayer;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Http;
-using twiker_backend.CustomAttributes.Authentication;
+using Microsoft.AspNetCore.Authorization;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -68,7 +68,7 @@ public class AccountController : ControllerBase
         }
     }
 
-    [HttpDelete("deleteAccount"), AccessAuthorize]
+    [HttpDelete("deleteAccount"), Authorize(AuthenticationSchemes = "AccessScheme")]
     public async Task<IActionResult> DeleteAccount([FromBody] string userIdentifier)
     {
         try
