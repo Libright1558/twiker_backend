@@ -19,10 +19,10 @@ services:
     image: "redis"
     container_name: twiker-redis
     hostname: twiker-redis
-    ports:
-      - "6379:6379"
     environment:
       - REDIS_REPLICATION_MODE=master
+    ports:
+      - "6379:6379"
 
   twiker-app:
     image: libright1558/twiker-app-dev:v1
@@ -32,11 +32,21 @@ services:
     depends_on:
       - db
       - redis
-    container_name: twiker-app-dev-container
-    hostname: twiker-app-dev-container
     ports:
-      - "5000:80"
+      - "8080:8080"
+    container_name: twiker-app-dev-container
+    hostname: twiker-app-dev
+
+  proxy:
+    image: nginx
+    container_name: nginx-container
+    hostname: nginx
+    depends_on:
+      - twiker-app
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/twiker.conf:/etc/nginx/conf.d/twiker.conf
 
 volumes:
   postgres_dev:
-  db-init:
