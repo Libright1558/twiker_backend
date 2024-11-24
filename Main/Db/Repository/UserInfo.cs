@@ -81,7 +81,7 @@ namespace twiker_backend.Db.Repository
 
         public async Task<UserDbData?> FindOneUser(string UsernameOrEmail)
         {
-            await using var connection = new NpgsqlConnection(DbConnectManager.DbConnectionString);
+            await using var connection = new NpgsqlConnection(DbConnectManager.InitDbConnectionString());
 
             try
             {

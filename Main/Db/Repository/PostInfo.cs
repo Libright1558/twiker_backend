@@ -119,7 +119,7 @@ namespace twiker_backend.Db.Repository
 
         public async Task<IEnumerable<PostFetch?>> GetPostsByUser(string postBy)
         {
-            using var connection = new NpgsqlConnection(DbConnectManager.DbConnectionString);
+            using var connection = new NpgsqlConnection(DbConnectManager.InitDbConnectionString());
             
             try
             {
