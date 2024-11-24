@@ -1,5 +1,5 @@
-using System.IdentityModel.Tokens.Jwt;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.JsonWebTokens;
 using System.Security.Cryptography;
 using System.Security.Claims;
 using System.Linq;
@@ -12,65 +12,33 @@ namespace twiker_backend.ServiceLayer
     {
         private readonly ILogger<AccessTokenService> _logger = logger;
 
-        public async Task<TokenRefreshResult> RefreshTokenAsync(string token)
+        public async Task<TokenRefreshResult> RefreshTokenAsync(string token, Guid userId, string username)
         {
             try
             {
                 DotNetEnv.Env.TraversePath().Load();
-                var publicKeyPath = DotNetEnv.Env.GetString("public_key");
                 var privateKeyPath = DotNetEnv.Env.GetString("private_key");
-
-                var publicKey = await File.ReadAllTextAsync(publicKeyPath!);
                 var privateKey = await File.ReadAllTextAsync(privateKeyPath!);
 
-                var tokenHandler = new JwtSecurityTokenHandler();
-                var _pubRsa = RSA.Create();
-                _pubRsa.ImportFromPem(publicKey.ToCharArray());
-                var validationParameters = new TokenValidationParameters
-                {
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new RsaSecurityKey(_pubRsa),
-                    ValidateIssuer = false,
-                    ValidateAudience = false,
-                    ClockSkew = TimeSpan.Zero
-                };
-
-                ClaimsPrincipal principal;
-                try
-                {
-                    principal = tokenHandler.ValidateToken(token, validationParameters, out _);
-                }
-                catch
-                {
-                    return new TokenRefreshResult { Success = false, ErrorMessage = "Invalid token" };
-                }
-
-                var userId = principal.FindFirst("userId")?.Value;
-                var username = principal.FindFirst("username")?.Value;
-                var authentication_token = principal.FindFirst("Authentication_token")?.Value;
-
-                if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(username) || string.IsNullOrEmpty(authentication_token))
-                {
-                    return new TokenRefreshResult { Success = false, ErrorMessage = "Invalid token claims" };
-                }
+                var tokenHandler = new JsonWebTokenHandler();
 
                 RSA _rsa = RSA.Create();
                 _rsa.ImportFromPem(privateKey.ToCharArray());
                 var key = new RsaSecurityKey(_rsa);
                 
-                var newToken = new JwtSecurityToken(
-                    claims:
+                var tokenDescriptor = new SecurityTokenDescriptor
+                {
+                    Subject = new ClaimsIdentity(
                     [
-                        new Claim("userId", userId),
+                        new Claim("userId", userId.ToString()),
                         new Claim("username", username),
                         new Claim("Access_token", "true")
-                    ],
-                    expires: DateTime.UtcNow.AddMinutes(10),
-                    signingCredentials: new SigningCredentials(key, SecurityAlgorithms.RsaSha256)
-                );
+                    ]),
+                    Expires = DateTime.UtcNow.AddMinutes(60),
+                    SigningCredentials = new SigningCredentials(key, SecurityAlgorithms.RsaSha256)
+                };
 
-                var accessToken = tokenHandler.WriteToken(newToken);
-
+                var accessToken = tokenHandler.CreateToken(tokenDescriptor);
                 return new TokenRefreshResult { Success = true, AccessToken = accessToken };
             }
             catch (Exception ex)
