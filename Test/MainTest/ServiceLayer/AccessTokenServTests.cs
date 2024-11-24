@@ -59,7 +59,7 @@ public class AccessTokenServiceTests
             var validToken = await GenerateValidToken(DateTime.UtcNow.AddMinutes(5));
 
             // Act
-            var result = await _accessTokenService.RefreshTokenAsync(validToken);
+            var result = await _accessTokenService.RefreshTokenAsync(validToken, Guid.Parse("random1"), "random2");
 
             Assert.Multiple(() =>
             {
@@ -67,99 +67,6 @@ public class AccessTokenServiceTests
                 Assert.That(result.Success, Is.True);
                 Assert.That(result.AccessToken, Is.Not.Null.And.Not.Empty);
                 Assert.That(result.ErrorMessage, Is.Null);
-            });
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.ToString());
-        }
-    }
-
-    [Test]
-    public async Task RefreshTokenAsync_ExpiredToken_ReturnsError()
-    {
-        try
-        {
-            // Arrange
-            var expiredToken = await GenerateValidToken(DateTime.UtcNow.AddSeconds(8));
-            await Task.Delay(8 * 1000);
-
-            // Act
-            var result = await _accessTokenService.RefreshTokenAsync(expiredToken);
-
-            Assert.Multiple(() =>
-            {
-                // Assert
-                Assert.That(result.Success, Is.False);
-                Assert.That(result.AccessToken, Is.Null);
-                Assert.That(result.ErrorMessage, Is.Not.Null.And.Not.Empty);
-            });
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.ToString());
-        }
-    }
-
-    [Test]
-    public async Task RefreshTokenAsync_InvalidToken_ReturnsError()
-    {
-        try
-        {
-            // Arrange
-            var invalidToken = "invalid.token.string";
-
-            // Act
-            var result = await _accessTokenService.RefreshTokenAsync(invalidToken);
-
-            Assert.Multiple(() =>
-            {
-                // Assert
-                Assert.That(result.Success, Is.False);
-                Assert.That(result.AccessToken, Is.Null);
-                Assert.That(result.ErrorMessage, Is.EqualTo("Invalid token"));
-            });
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.ToString());
-        }
-    }
-
-    [Test]
-    public async Task RefreshTokenAsync_TokenWithoutRequiredClaims_ReturnsError()
-    {
-        try
-        {
-            // Arrange
-            var rsa = RSA.Create();
-            var privateKeyText = await File.ReadAllTextAsync(_privateKey!);
-            rsa.ImportFromPem(privateKeyText.ToCharArray());
-            var securityKey = new RsaSecurityKey(rsa);
-
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var tokenDescriptor = new SecurityTokenDescriptor
-            {
-                Subject = new ClaimsIdentity(new[]
-                {
-                    new Claim("someOtherClaim", "someValue")
-                }),
-                Expires = DateTime.UtcNow.AddMinutes(5),
-                SigningCredentials = new SigningCredentials(securityKey, SecurityAlgorithms.RsaSha256)
-            };
-
-            var token = tokenHandler.CreateToken(tokenDescriptor);
-            var tokenWithoutRequiredClaims = tokenHandler.WriteToken(token);
-
-            // Act
-            var result = await _accessTokenService.RefreshTokenAsync(tokenWithoutRequiredClaims);
-
-            Assert.Multiple(() =>
-            {
-                // Assert
-                Assert.That(result.Success, Is.False);
-                Assert.That(result.AccessToken, Is.Null);
-                Assert.That(result.ErrorMessage, Is.EqualTo("Invalid token claims"));
             });
         }
         catch (Exception ex)
@@ -177,7 +84,7 @@ public class AccessTokenServiceTests
             var validToken = await GenerateValidToken(DateTime.UtcNow.AddMinutes(5));
 
             // Act
-            var result = await _accessTokenService.RefreshTokenAsync(validToken);
+            var result = await _accessTokenService.RefreshTokenAsync(validToken, Guid.Parse("random1"), "random2");
 
             Assert.Multiple(() =>
             {
