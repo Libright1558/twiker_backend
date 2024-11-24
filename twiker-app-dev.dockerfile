@@ -4,13 +4,14 @@ WORKDIR /source
 
 # Copy project file, restore and build app
 COPY Main ./Main
-COPY Test ./Test
-COPY KeyPair ./KeyPair
-COPY .env ./.env
-COPY twiker_backend.sln ./twiker_backend.sln
-RUN dotnet restore
-RUN dotnet build --no-restore
+RUN dotnet restore Main/Main-solution.sln
+RUN dotnet publish Main/Main-solution.sln -c Release -o out
 
 # Runtime stage
-WORKDIR /source/Main
-ENTRYPOINT ["dotnet", "run"]
+FROM mcr.microsoft.com/dotnet/aspnet:8.0
+WORKDIR /source
+COPY --from=build /source/out .
+COPY KeyPair ./KeyPair
+COPY .env ./.env
+ENV ASPNETCORE_ENVIRONMENT Development
+ENTRYPOINT ["dotnet", "twiker_backend.dll", "--environment=Development"]
