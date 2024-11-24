@@ -1,13 +1,13 @@
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading.Tasks;
+using System.Security.Claims;
 using twiker_backend.ServiceLayer;
 using Microsoft.Extensions.Logging;
-using twiker_backend.CustomAttributes.Authentication;
 using Microsoft.AspNetCore.Authorization;
 
 [ApiController]
-[Route("api/[controller]"), AccessAuthorize]
+[Route("api/[controller]"), Authorize(AuthenticationSchemes = "AccessScheme")]
 public class UserController : ControllerBase
 {
     private readonly ILogger<UserController> _logger;
@@ -20,11 +20,13 @@ public class UserController : ControllerBase
         _logger = logger;
     }
 
-    [HttpGet("{userId}")]
-    public async Task<IActionResult> GetPersonalData(Guid userId)
+    [HttpGet("getUser")]
+    public async Task<IActionResult> GetPersonalData()
     {
         try
         {
+            Guid userId = Guid.Parse(User.FindFirst("userId")?.Value!);
+
             var userData = await _userService.GetThePersonalData(userId);
             if (userData == null)
             {
