@@ -3,11 +3,10 @@ using System.Threading.Tasks;
 using twiker_backend.ServiceLayer;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Http;
-using twiker_backend.CustomAttributes.Authentication;
 using Microsoft.AspNetCore.Authorization;
 
 [ApiController]
-[Route("api/[controller]"), JwtAuthorize]
+[Route("api/[controller]"), Authorize(AuthenticationSchemes = "JwtScheme")]
 public class TokenController : ControllerBase
 {
     private readonly ILogger<TokenController> _logger;
@@ -25,6 +24,9 @@ public class TokenController : ControllerBase
     {
         try
         {
+            Guid userId = Guid.Parse(User.FindFirst("userId")?.Value!);
+            string username = User.FindFirst("username")?.Value!;
+
             var authorizationHeader = Request.Headers.Authorization.ToString();
             if (string.IsNullOrEmpty(authorizationHeader) || !authorizationHeader.StartsWith("Bearer "))
             {
@@ -33,7 +35,7 @@ public class TokenController : ControllerBase
 
             var token = authorizationHeader.Substring("Bearer ".Length);
 
-            var result = await _tokenService.RefreshTokenAsync(token);
+            var result = await _tokenService.RefreshTokenAsync(token, userId, username);
 
             if (result.Success)
             {
