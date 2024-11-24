@@ -5,7 +5,7 @@ namespace twiker_backend.ServiceLayer
 {
     public interface IAccessTokenService
     {
-        Task<TokenRefreshResult> RefreshTokenAsync(string token);
+        Task<TokenRefreshResult> RefreshTokenAsync(string token, Guid userId, string username);
     }
 
     public interface IAccountService
