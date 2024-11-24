@@ -1,6 +1,6 @@
 using System;
 using System.Threading.Tasks;
-using System.IdentityModel.Tokens.Jwt;
+using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 using System.Security.Cryptography;
 using System.Security.Claims;
@@ -34,7 +34,7 @@ namespace twiker_backend.ServiceLayer
             _rsa.ImportFromPem(privateKeyText.ToCharArray());
             var RSAkey = new RsaSecurityKey(_rsa);
 
-            var tokenHandler = new JwtSecurityTokenHandler();
+            var tokenHandler = new JsonWebTokenHandler();
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(
@@ -48,7 +48,7 @@ namespace twiker_backend.ServiceLayer
             };
 
             var token = tokenHandler.CreateToken(tokenDescriptor);
-            return tokenHandler.WriteToken(token);
+            return token;
         }
 
         public async Task<RegisterResult> RegisterAccountAsync(RegisterModel model)
