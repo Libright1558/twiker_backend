@@ -1,6 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
-using twiker_backend.Swagger.SwaggerAttributes;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Security.Cryptography;
@@ -37,60 +36,13 @@ builder.Services.AddDbContext<TwikerContext>(options => options.UseNpgsql(DotNet
 
 // Configure JWT authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-.AddJwtBearer("AccessScheme", async options =>
-{
-    var publicKeyPath = DotNetEnv.Env.GetString("public_key");
-    var publicKey = await File.ReadAllTextAsync(publicKeyPath!);
-    var _pubRsa = RSA.Create();
-    _pubRsa.ImportFromPem(publicKey.ToCharArray());
-    options.TokenValidationParameters = new TokenValidationParameters
-    {
-        ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new RsaSecurityKey(_pubRsa),
-        ValidateIssuer = false,
-        ValidateAudience = false,
-        ClockSkew = TimeSpan.Zero
-    };
-
-    options.Events = new JwtBearerEvents
-    {
-        OnTokenValidated = context =>
-        {
-            var userIdClaim = context.Principal?.FindFirst("userId")?.Value;
-            var usernameClaim = context.Principal?.FindFirst("username")?.Value;
-            var accessTokenClaim = context.Principal?.FindFirst("Access_token")?.Value;
-
-            if (userIdClaim == null || usernameClaim == null || accessTokenClaim == null)
-            {
-                context.Fail("Required claims are missing.");
-            }
-
-            return Task.CompletedTask;
-        },
-        OnAuthenticationFailed = context =>
-        {
-            if (context.Exception.GetType() == typeof(SecurityTokenExpiredException))
-            {
-                context.Fail("Token Expired!");
-            }
-            return Task.CompletedTask;
-        }
-    };
-})
 .AddJwtBearer("JwtScheme", async options =>
 {
     var publicKeyPath = DotNetEnv.Env.GetString("public_key");
     var publicKey = await File.ReadAllTextAsync(publicKeyPath!);
     var _pubRsa = RSA.Create();
     _pubRsa.ImportFromPem(publicKey.ToCharArray());
-    options.TokenValidationParameters = new TokenValidationParameters
-    {
-        ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new RsaSecurityKey(_pubRsa),
-        ValidateIssuer = false,
-        ValidateAudience = false,
-        ClockSkew = TimeSpan.Zero
-    };
+    var signedKey = new RsaSecurityKey(_pubRsa);
 
     options.Events = new JwtBearerEvents
     {
@@ -103,6 +55,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             if (userIdClaim == null || usernameClaim == null || accessTokenClaim == null)
             {
                 context.Fail("Required claims are missing.");
+                context.Response.StatusCode = 401;
             }
 
             return Task.CompletedTask;
@@ -112,9 +65,68 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             if (context.Exception.GetType() == typeof(SecurityTokenExpiredException))
             {
                 context.Fail("Token Expired!");
+                context.Response.StatusCode = 401;
             }
             return Task.CompletedTask;
         }
+    };
+
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuerSigningKey = false,
+        IssuerSigningKey = signedKey,
+        ValidateIssuer = false,
+        ValidateAudience = false,
+        ValidateLifetime = true,
+        RequireExpirationTime = true,
+        ClockSkew = TimeSpan.Zero
+    };
+})
+.AddJwtBearer("AccessScheme", async options =>
+{
+    var publicKeyPath = DotNetEnv.Env.GetString("public_key");
+    var publicKey = await File.ReadAllTextAsync(publicKeyPath!);
+    var _pubRsa = RSA.Create();
+    _pubRsa.ImportFromPem(publicKey.ToCharArray());
+    var signedKey = new RsaSecurityKey(_pubRsa);
+
+    options.Events = new JwtBearerEvents
+    {
+        OnTokenValidated = context =>
+        {
+            var userIdClaim = context.Principal?.FindFirst("userId")?.Value;
+            var usernameClaim = context.Principal?.FindFirst("username")?.Value;
+            var accessTokenClaim = context.Principal?.FindFirst("Access_token")?.Value;
+
+            if (userIdClaim == null || usernameClaim == null || accessTokenClaim == null)
+            {
+                context.Fail("Required claims are missing.");
+                context.Response.StatusCode = 401;
+            }
+
+            return Task.CompletedTask;
+        },
+        OnAuthenticationFailed = context =>
+        {
+            if (context.Exception.GetType() == typeof(SecurityTokenExpiredException))
+            {
+                context.Fail("Token Expired!");
+                context.Response.StatusCode = 401;
+            }
+
+            return Task.CompletedTask;
+        }
+    };
+
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuerSigningKey = false,
+        IssuerSigningKey = signedKey,
+        ValidateIssuer = false,
+        ValidateAudience = false,
+        ValidateLifetime = true,
+        RequireExpirationTime = true,
+        ClockSkew = TimeSpan.Zero
     };
 });
 
@@ -157,18 +169,16 @@ builder.Services.AddSwaggerGen(c =>
             {
                 Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "JwtScheme" }
             },
-            new string[] {}
+            Array.Empty<string>()
         },
         {
             new OpenApiSecurityScheme
             {
                 Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "AccessScheme" }
             },
-            new string[] {}
+            Array.Empty<string>()
         }
     });
-
-    c.OperationFilter<SwaggerAuthorizeCheckOperationFilter>();
 });
 
 var app = builder.Build();
@@ -178,11 +188,6 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
-}
-else if (app.Environment.IsProduction())
-{
-    app.UseExceptionHandler("/Error");
-    app.UseHsts();
 }
 
 // Use authentication and authorization
