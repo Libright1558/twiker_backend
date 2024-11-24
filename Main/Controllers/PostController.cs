@@ -1,13 +1,14 @@
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading.Tasks;
+using System.Security.Claims;
 using twiker_backend.ServiceLayer;
 using Microsoft.Extensions.Logging;
-using twiker_backend.CustomAttributes.Authentication;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.Configuration.UserSecrets;
 
 [ApiController]
-[Route("api/[controller]"), AccessAuthorize]
+[Route("api/[controller]"), Authorize(AuthenticationSchemes = "AccessScheme")]
 public class PostController : ControllerBase
 {
     private readonly ILogger<PostController> _logger;
@@ -20,11 +21,14 @@ public class PostController : ControllerBase
         _logger = logger;
     }
 
-    [HttpGet]
-    public async Task<IActionResult> GetPosts([FromQuery] Guid userId, [FromQuery] string username)
+    [HttpGet("getPost")]
+    public async Task<IActionResult> GetPosts()
     {
         try
         {
+            Guid userId = Guid.Parse(User.FindFirst("userId")?.Value!);
+            string username = User.FindFirst("username")?.Value!;
+
             var posts = await _postService.GetPost(userId, username);
             return Ok(posts);
         }
@@ -36,13 +40,21 @@ public class PostController : ControllerBase
         }
     }
 
-    [HttpPost]
-    public async Task<IActionResult> CreatePost([FromBody] CreatePostRequest request)
+    [HttpPost("createPost")]
+    public async Task<IActionResult> CreatePost ([FromBody] string content)
     {
         try
         {
-            var post = await _postService.WritePost(request.UserId, request.PostBy, request.Content);
-            return CreatedAtAction(nameof(GetPosts), new { userId = request.UserId }, post);
+            Guid userId = Guid.Parse(User.FindFirst("userId")?.Value!);
+            string username = User.FindFirst("username")?.Value!;
+
+            if (string.IsNullOrEmpty(content))
+            {
+                return StatusCode(400, "content missing");
+            }
+
+            var post = await _postService.WritePost(userId, username, content);
+            return CreatedAtAction(nameof(GetPosts), new { userId }, post);
         }
         catch (Exception ex)
         {
@@ -53,11 +65,19 @@ public class PostController : ControllerBase
     }
 
     [HttpPut("like")]
-    public async Task<IActionResult> UpdateLike([FromBody] UpdateInteractionRequest request)
+    public async Task<IActionResult> UpdateLike ([FromBody] string postId)
     {
         try
         {
-            await _postService.UpdateLike(request.PostId, request.UserId, request.Username);
+            Guid userId = Guid.Parse(User.FindFirst("userId")?.Value!);
+            string username = User.FindFirst("username")?.Value!;
+
+            if (string.IsNullOrEmpty(postId))
+            {
+                return StatusCode(400, "postId missing");
+            }
+
+            await _postService.UpdateLike(Guid.Parse(postId), userId, username);
             return Ok();
         }
         catch (Exception ex)
@@ -69,11 +89,19 @@ public class PostController : ControllerBase
     }
 
     [HttpPut("retweet")]
-    public async Task<IActionResult> UpdateRetweet([FromBody] UpdateInteractionRequest request)
+    public async Task<IActionResult> UpdateRetweet ([FromBody] string postId)
     {
         try
         {
-            await _postService.UpdateRetweet(request.PostId, request.UserId, request.Username);
+            Guid userId = Guid.Parse(User.FindFirst("userId")?.Value!);
+            string username = User.FindFirst("username")?.Value!;
+
+            if (string.IsNullOrEmpty(postId))
+            {
+                return StatusCode(400, "postId missing");
+            }
+
+            await _postService.UpdateRetweet(Guid.Parse(postId), userId, username);
             return Ok();
         }
         catch (Exception ex)
@@ -84,12 +112,19 @@ public class PostController : ControllerBase
         }
     }
 
-    [HttpDelete("{postId}")]
-    public async Task<IActionResult> DeletePost(Guid postId, [FromQuery] Guid userId)
+    [HttpDelete("deletePost")]
+    public async Task<IActionResult> DeletePost([FromBody] string postId)
     {
         try
         {
-            await _postService.DeletePost(userId, postId);
+            Guid userId = Guid.Parse(User.FindFirst("userId")?.Value!);
+
+            if (string.IsNullOrEmpty(postId))
+            {
+                return StatusCode(400, "postId missing");
+            }
+
+            await _postService.DeletePost(userId, Guid.Parse(postId));
             return NoContent();
         }
         catch (Exception ex)
@@ -99,18 +134,4 @@ public class PostController : ControllerBase
             return StatusCode(500, $"Internal server error: {ex.Message}");
         }
     }
-}
-
-public class CreatePostRequest
-{
-    public Guid UserId { get; set; }
-    public string PostBy { get; set; } = null!;
-    public string Content { get; set; } = null!;
-}
-
-public class UpdateInteractionRequest
-{
-    public Guid PostId { get; set; }
-    public Guid UserId { get; set; }
-    public string Username { get; set; } = null!;
 }
