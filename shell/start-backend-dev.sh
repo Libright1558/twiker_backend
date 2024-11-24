@@ -1,9 +1,10 @@
 #!/bin/bash
 
-# Create key pair
-mkdir -p ./KeyPair
-openssl genrsa -out ./KeyPair/private_key.pem 2048
-openssl rsa -in ./KeyPair/private_key.pem -pubout -out ./KeyPair/public_key.pem
-
 # Start up docker compose
 docker compose -f ./docker-compose-dev.yml -p twiker-docker up -d --remove-orphans
+
+# Disable nginx default.conf
+docker exec nginx-container mv /etc/nginx/conf.d/default.conf /etc/nginx/conf.d/default.conf.disabled
+
+# Reload nginx
+docker exec nginx-container nginx -s reload
