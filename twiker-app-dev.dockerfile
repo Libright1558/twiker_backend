@@ -4,8 +4,8 @@ WORKDIR /source
 
 # Copy project file, restore and build app
 COPY Main ./Main
-RUN dotnet restore Main/Main-solution.sln
-RUN dotnet publish Main/Main-solution.sln -c Release -o out
+RUN dotnet restore Main/twiker_backend.csproj
+RUN dotnet publish Main/twiker_backend.csproj -c Release -o out
 
 # Runtime stage
 FROM mcr.microsoft.com/dotnet/aspnet:8.0
