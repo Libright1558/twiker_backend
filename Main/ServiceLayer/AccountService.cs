@@ -44,7 +44,7 @@ namespace twiker_backend.ServiceLayer
                     new Claim("Authentication_token", "true")
                 ]),
                 Expires = DateTime.UtcNow.AddDays(7),
-                SigningCredentials = new SigningCredentials(RSAkey, SecurityAlgorithms.RsaSha256)
+                SigningCredentials = new SigningCredentials(RSAkey, SecurityAlgorithms.RsaSha256Signature)
             };
 
             var token = tokenHandler.CreateToken(tokenDescriptor);
