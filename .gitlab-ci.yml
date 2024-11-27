@@ -2,14 +2,17 @@ variables:
   UNIT_TEST_BUILD_PATH: '$CI_PROJECT_DIR/shell/start-twiker-unitTest.sh'
   UNIT_TEST_EXEC_PATH: '$CI_PROJECT_DIR/shell/exec-twiker-unitTest.sh'
   UNIT_TEST_FIN_PATH: '$CI_PROJECT_DIR/shell/stop-twiker-unitTest.sh'
+  CURL_TEST_BUILD_PATH: '$CI_PROJECT_DIR/shell/start-backend-dev.sh'
+  CURL_TEST_EXEC_PATH: '$CI_PROJECT_DIR/shell/curl/http-request.sh'
+  CURL_TEST_FIN_PATH: '$CI_PROJECT_DIR/shell/stop-backend-dev.sh'
 
 stages:
   - build
   - test
 
-build:
+unit_test_build:
   tags:
-    - twiker_backend_unit_test
+    - twiker_backend
   stage: build
   before_script:
     - |
@@ -22,14 +25,46 @@ build:
   timeout:
     20 minutes
 
-unit test:
+unit_test:
   tags:
     - twiker_backend_unit_test
   stage: test
-  needs: ["build"]
+  needs: 
+    - job: unit_test_build
   script: 
     - $UNIT_TEST_EXEC_PATH
   timeout:
     10 minutes
   after_script: 
     - $UNIT_TEST_FIN_PATH
+
+curl_test_build:
+  tags:
+    - twiker_backend
+  stage: build
+  needs:
+    - job: unit_test
+  before_script:
+    - |
+      mkdir -p ./KeyPair
+      openssl genrsa -out ./KeyPair/private_key.pem 2048
+      openssl rsa -in ./KeyPair/private_key.pem -pubout -out ./KeyPair/public_key.pem
+    - cp ${DEV_ENV_FILE} .env
+  script: 
+    - $CURL_TEST_BUILD_PATH
+  timeout:
+    20 minutes
+
+curl_test:
+  tags:
+    - twiker_backend_curl_test
+  stage: test
+  needs:
+    - job: unit_test
+    - job: curl_test_build
+  script: 
+    - $CURL_TEST_EXEC_PATH
+  timeout:
+    10 minutes
+  after_script: 
+    - $CURL_TEST_FIN_PATH
