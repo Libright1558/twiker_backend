@@ -25,7 +25,7 @@ services:
       - "6379:6379"
 
   twiker-app:
-    image: libright1558/twiker-app-dev:v1
+    image: libright1558/twiker-app-dev:v1.0.0
     build: 
       dockerfile: twiker-app-dev.dockerfile
       context: .
