@@ -26,7 +26,12 @@ namespace twiker_backend.ServiceLayer
             try {
                 RedisUserData result = await _redisUserInfo.GetUserInfoAsync(userId.ToString());
 
-                if (result == null || result!.Username == null)
+                if (result == null || 
+                    result!.Firstname == null || result!.Firstname == "" ||
+                    result!.Lastname == null || result!.Lastname == "" ||
+                    result!.Username == null || result!.Username == "" ||
+                    result!.Email == null || result!.Email == "" ||
+                    result!.Profilepic == null || result!.Profilepic == "")
                 {
                     UserDbData? Response = await _dbUserInfo.GetUserData(userId);
                     if (Response != null)
