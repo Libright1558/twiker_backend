@@ -66,16 +66,16 @@ namespace twiker_backend.ServiceLayer
 
             for (int i = 0; i < postGuidArray.Length; i++)
             {
-                if (redisPost.Content?[i] == null) missingData.ContentAbsent.Add(postGuidArray[i]);
-                if (redisPost.CreatedAt?[i] == null) missingData.CreatedAtAbsent.Add(postGuidArray[i]);
-                if (redisPost.LikeNums?[i] == null) missingData.LikeNumsAbsent.Add(postGuidArray[i]);
-                if (redisPost.RetweetNums?[i] == null) missingData.RetweetNumsAbsent.Add(postGuidArray[i]);
-                if (redisPost.SelfLike?[i] == null) missingData.SelfLikeAbsent.Add(postGuidArray[i]);
-                if (redisPost.SelfRetweet?[i] == null) missingData.SelfRetweetAbsent.Add(postGuidArray[i]);
-                if (redisPost.PostOwner?[i] == null) missingData.PostOwnerAbsent.Add(postGuidArray[i]);
-                if (redisPost.Firstname?[i] == null) missingData.FirstnameAbsent.Add(postGuidArray[i]);
-                if (redisPost.Lastname?[i] == null) missingData.LastnameAbsent.Add(postGuidArray[i]);
-                if (redisPost.Profilepic?[i] == null) missingData.ProfilepicAbsent.Add(postGuidArray[i]);
+                if (redisPost.Content?[i] == null || redisPost.Content?[i] == "") missingData.ContentAbsent.Add(postGuidArray[i]);
+                if (redisPost.CreatedAt?[i] == null || redisPost.CreatedAt?[i] == "") missingData.CreatedAtAbsent.Add(postGuidArray[i]);
+                if (redisPost.LikeNums?[i] == null || redisPost.LikeNums?[i] == "") missingData.LikeNumsAbsent.Add(postGuidArray[i]);
+                if (redisPost.RetweetNums?[i] == null || redisPost.RetweetNums?[i] == "") missingData.RetweetNumsAbsent.Add(postGuidArray[i]);
+                if (redisPost.SelfLike?[i] == null || redisPost.SelfLike?[i] == "") missingData.SelfLikeAbsent.Add(postGuidArray[i]);
+                if (redisPost.SelfRetweet?[i] == null || redisPost.SelfRetweet?[i] == "") missingData.SelfRetweetAbsent.Add(postGuidArray[i]);
+                if (redisPost.PostOwner?[i] == null || redisPost.PostOwner?[i] == "") missingData.PostOwnerAbsent.Add(postGuidArray[i]);
+                if (redisPost.Firstname?[i] == null || redisPost.Firstname?[i] == "") missingData.FirstnameAbsent.Add(postGuidArray[i]);
+                if (redisPost.Lastname?[i] == null || redisPost.Lastname?[i] == "") missingData.LastnameAbsent.Add(postGuidArray[i]);
+                if (redisPost.Profilepic?[i] == null || redisPost.Profilepic?[i] == "") missingData.ProfilepicAbsent.Add(postGuidArray[i]);
             }
 
             return missingData;
