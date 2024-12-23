@@ -9,6 +9,9 @@ using Microsoft.EntityFrameworkCore;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using twiker_backend.Db.Repository;
+using twiker_backend.Redis;
+using StackExchange.Redis;
+using Test.MainTest.Redis;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Configuration;
 
@@ -20,6 +23,8 @@ public class AccountServiceTests
     private DbContextOptions<TwikerContext> _options;
     private TwikerContext _context;
     private IDbUserInfo _dbUserInfo;
+    private IConnectionMultiplexer _connectionMultiplexer;
+    private IRedisUserData _redisUserInfo;
 
     [OneTimeSetUp]
     public void Setup()
@@ -33,9 +38,13 @@ public class AccountServiceTests
         _context = new TwikerContext(_options);
         _dbUserInfo = new DbUserInfo(_context);
 
+        // Setup redis connection
+        _connectionMultiplexer = RedisConnectOperation.Connection;
+        _redisUserInfo = new UserInfo(_connectionMultiplexer);
+
         // Initialize AccountService
         _loggerMock = new Mock<ILogger<AccountService>>();
-        _accountService = new AccountService(_dbUserInfo, _loggerMock.Object);
+        _accountService = new AccountService(_dbUserInfo, _loggerMock.Object, _redisUserInfo);
 
     }
 
