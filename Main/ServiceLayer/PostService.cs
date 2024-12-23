@@ -120,7 +120,8 @@ namespace twiker_backend.ServiceLayer
             {
                 var DbDeletePostTask = _dbPostInfo.DeletePost(postId);
                 var RedisDeletePostTask = _redisPostInfo.DeletePostInfo(userId.ToString(), postId.ToString());
-                await Task.WhenAll(DbDeletePostTask, RedisDeletePostTask);
+                var RedisDeletePostIdArrayTask = _redisPostInfo.DeletePostIdArray(userId.ToString());
+                await Task.WhenAll(DbDeletePostTask, RedisDeletePostTask, RedisDeletePostIdArrayTask);
             }
             catch (Exception ex)
             {
