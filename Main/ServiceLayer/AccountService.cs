@@ -7,6 +7,7 @@ using System.Security.Claims;
 using BC = BCrypt.Net.BCrypt;
 using twiker_backend.Db.Repository;
 using twiker_backend.Db.Models;
+using twiker_backend.Redis;
 using Microsoft.Extensions.Logging;
 
 namespace twiker_backend.ServiceLayer
@@ -17,10 +18,13 @@ namespace twiker_backend.ServiceLayer
 
         private readonly IDbUserInfo _dbUserInfo;
 
-        public AccountService(IDbUserInfo dbUserInfo, ILogger<AccountService> logger)
+        private readonly IRedisUserData _redisUserInfo;
+
+        public AccountService(IDbUserInfo dbUserInfo, ILogger<AccountService> logger, IRedisUserData redisUserInfo)
         {
             _dbUserInfo = dbUserInfo;
             _logger = logger;
+            _redisUserInfo = redisUserInfo;
             Environment.SetEnvironmentVariable("ProfilePath", "/images/UserProfiles/ProfilePic.jpeg");
         }
 
@@ -143,6 +147,7 @@ namespace twiker_backend.ServiceLayer
                 }
 
                 await _dbUserInfo.DeleteUserData(FoundUser.UserId);
+                await _redisUserInfo.DeleteUserInfo(FoundUser.UserId.ToString());
                 return DeleteAccountResult.Success;
             }
             catch (Exception ex)
