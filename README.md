@@ -42,3 +42,36 @@ erDiagram
         timestamptz createdAt
     }
 ```
+
+### Redis Schema
+```mermaid
+---
+title: Redis Schema
+---
+
+erDiagram
+    UserDataKeyValuePair {
+        userId_Firstname userFirstname
+        userId_Lastname  userLastname
+        userId_Username userUsername
+        userId_Email userEmail
+        userId_Profilepic userProfilepic
+    }
+
+    PostDataKeyValuePair {
+        postId_Content   postContent
+        postId_CreatedAt   postCreatedAt
+        postId_LikeNums   postLikeNums
+        postId_RetweetNums   postRetweetNums
+        postId_selfUserId_SelfLike  postSelfLike
+        postId_selfUserId_SelfRetweet  postSelfRetweet
+        postId_PostOwner   postOwner
+        postId_Firstname   postOwnerFirstname
+        postId_Lastname   postOwnerLastname
+        postId_Profilepic   postOwnerProfilepic
+    }
+
+    PostIdList {
+        userId_PostIdArray postIdList
+    }
+```
